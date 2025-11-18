@@ -8,19 +8,22 @@ import (
 
 func main() {
 	// Настройка логгера: вывода логов в консоль в формате JSON
-	configZap := zap.Config {
-		Encoding: "json",
-		Level: zap.NewAtomicLevelAt(zapcore.DebugLevel),
-		OutputPaths: []string{"stdout"}, // вывод в консоль // TODO >file
-		EncoderConfig:    zap.NewProductionEncoderConfig(),
+	configZap := zap.Config{
+		Encoding:      "json",
+		Level:         zap.NewAtomicLevelAt(zapcore.DebugLevel),
+		OutputPaths:   []string{"stdout"}, // вывод в консоль // TODO >file
+		EncoderConfig: zap.NewProductionEncoderConfig(),
 	}
 	logger, _ := configZap.Build()
 	defer logger.Sync()
 
-	settings := server.Settings{}
-
-	err := server.RunSrv(logger, settings)
-	if err != nil {
-		logger.Fatal(err.Error())
+	settings := server.Settings{
+		Ip:   "127.0.0.1",
+		Port: 7075,
 	}
+
+	server.RunSrv(logger, &settings)
+	// if err != nil {
+	// 	logger.Fatal(err.Error())
+	// }
 }
