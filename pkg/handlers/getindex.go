@@ -13,6 +13,9 @@ func GetIndexHTML(w http.ResponseWriter, r *http.Request) {
 	// }
 	fmt.Println("------")
 	http.ServeFile(w, r, "./web/index.html")
+	// http.ServeFile(w, r, "/web/js/scripts.min.js")
+	// http.ServeFile(w, r, "/web/css/style.css")
+	// http.ServeFile(w, r, "./web/favicon.ico")
 	// w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	// w.WriteHeader(http.StatusOK)
 	// w.Write(data)
