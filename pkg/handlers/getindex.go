@@ -1,22 +1,26 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
+	"text/template"
 )
+const indexHTML = "./web/index.html"
+func Home(w http.ResponseWriter, r *http.Request) {
+    //ts, err := template.ParseFiles("./web/sample_index.html")
+    ts, err := template.ParseFiles("./web/index.html")
+    if err != nil {
+        //Logger.Print(err.Error())
+        http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+        return
+    }
 
-func GetIndexHTML(w http.ResponseWriter, r *http.Request) {
-	// data, err := os.ReadFile("web/index.html")
-	// if err != nil {
-	// 	http.Error(w, fmt.Sprintf("ошибка при считывании файла: %v", err), http.StatusInternalServerError)
-	// 	return
-	// }
-	fmt.Println("------")
-	http.ServeFile(w, r, "./web/index.html")
-	// http.ServeFile(w, r, "/web/js/scripts.min.js")
-	// http.ServeFile(w, r, "/web/css/style.css")
-	// http.ServeFile(w, r, "./web/favicon.ico")
-	// w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	// w.WriteHeader(http.StatusOK)
-	// w.Write(data)
+    // Then we use the Execute() method on the template set to write the
+    // template content as the response body. The last parameter to Execute()
+    // represents any dynamic data that we want to pass in, which for now we'll
+    // leave as nil.
+    err = ts.Execute(w, nil)
+    if err != nil {
+        //logger.Print(err.Error())
+        http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+    }
 }

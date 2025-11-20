@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/len4ernova/go_final_project/pkg/handlers"
 	"go.uber.org/zap"
 )
 
@@ -12,8 +13,9 @@ type Settings struct {
 	Ip   string
 	Port int
 }
+const indexHTML = "web/index.html"
 
-const webDir = "./web"
+const webDir = "../go_final_project/web"
 // RunSrv - запустить сервер.
 func RunSrv(logger *zap.Logger, settings *Settings) {
 	mux := http.NewServeMux()
@@ -24,30 +26,19 @@ func RunSrv(logger *zap.Logger, settings *Settings) {
 		ReadTimeout: 5 * time.Second,
 		IdleTimeout: 10 * time.Second,
 	}
+    
+    mux.Handle("GET /css/", http.StripPrefix("/css", http.FileServer(http.Dir("./web/css"))))
+    mux.Handle("GET /js/", http.StripPrefix("/js", http.FileServer(http.Dir("./web/js"))))
+    mux.Handle("/", http.FileServer(http.Dir("./web/"))) 
 
-	fileServer := http.FileServer(http.Dir("./web"))
-	
-	// Указываем обработчики
-	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "./web/index.html")
-	}) //index.html
-	 
-    mux.Handle("GET /js/scripts.min.js/", fileServer)
-    mux.Handle("GET /css/style.css/", fileServer)
-    mux.Handle("GET /favicon.ico/", fileServer)
-
-	// mux.HandleFunc("GET /css/style.css", func(w http.ResponseWriter, r *http.Request) {
-	// 	http.ServeFile(w, r, "./web/css/style.css")
-	// })
-	// mux.HandleFunc("GET /favicon.ico", func(w http.ResponseWriter, r *http.Request) {
-	// 	http.ServeFile(w, r, "./web/favicon.ico")
-	// })
-	// mux.HandleFunc("/web/js/scripts.min.js", handlers.js)
-	// mux.HandleFunc("/web/css/style.css", handlers.css)
-	// mux.HandleFunc("/web/favicon.ico", handlers.css)
+    mux.HandleFunc("GET /{$}", handlers.Home)
 	
 	logger.Sugar().Info("Serving on http://%v ...", server.Addr)
 	if err := server.ListenAndServe(); err != nil {
 		logger.Sugar().Fatal(err)
 	}
 }
+
+
+//Параллелизм в Go Кэтрин Кокс-Будай Изучение Go Джона Боднера
+
