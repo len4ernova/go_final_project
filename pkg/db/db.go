@@ -1,12 +1,21 @@
 package db
+
 import (
-	"modernc.org/sqlite"
+	"database/sql"
+	"os"
 )
+
 const schema = `
-CREATE TABLE IF NOT EXISTS scheduler (
-id
-)
-`
+	CREATE TABLE IF NOT EXISTS scheduler (
+		id integer PRIMARY KEY AUTOINCREMENT,
+		date char(8) NOT NULL DEFAULT "",
+		title varchar(256) NOT NULL DEFAULT "",
+		comment text NOT NULL DEFAULT "",
+		repeat varchar(128) NOT NULL DEFAULT ""
+	);`
+const ind = `CREATE INDEX schedule_date ON scheduler (date);`
+
+// Init - инициализация БД.gibt
 func Init(dbFile string) {
 	_, err := os.Stat(dbFile)
 	var install bool
@@ -25,12 +34,9 @@ func Init(dbFile string) {
 	}
 	defer db.Close()
 
-
-
-
 }
-func createSchemaProcess(db *sql.DB) error{
-		_, err := db.Exec(`
+func createSchemaProcess(db *sql.DB) error {
+	_, err := db.Exec(`
 	CREATE TABLE IF NOT EXISTS processes (
 		id_proc integer PRIMARY KEY AUTOINCREMENT,
 		name_proc text NOT NULL DEFAULT ""  UNIQUE
