@@ -5,9 +5,9 @@ import (
 	"strconv"
 )
 
-// PortVal - получить значение порта из переменной окружения или присвоить значение по ум.
-func PortVal(name string, dfltPort int) (int, error) {
-	port := os.Getenv("TODO_PORT")
+// PortVal - получение значения порт из переменной окружения или присвоить значение по ум.
+func PortVal(envName string, dfltPort int) (int, error) {
+	port := os.Getenv(envName)
 	if port == "" {
 		return dfltPort, nil
 	}
@@ -17,4 +17,11 @@ func PortVal(name string, dfltPort int) (int, error) {
 		return 0, err
 	}
 	return p, nil
+}
+
+// Path2DB - получение значения путь к БД.
+func Path2DB(envName string) (string, error) {
+	val := os.Getenv(envName)
+	//TODO validator
+	return val, nil
 }

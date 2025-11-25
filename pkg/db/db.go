@@ -1,8 +1,11 @@
+// db package organizes work with the database.
 package db
 
 import (
 	"database/sql"
 	"os"
+
+	_ "modernc.org/sqlite"
 )
 
 const schema = `
@@ -13,34 +16,38 @@ const schema = `
 		comment text NOT NULL DEFAULT "",
 		repeat varchar(128) NOT NULL DEFAULT ""
 	);`
-const ind = `CREATE INDEX schedule_date ON scheduler (date);`
+const index = `CREATE INDEX schedule_date ON scheduler (date);`
 
-// Init - инициализация БД.gibt
-func Init(dbFile string) {
-	_, err := os.Stat(dbFile)
-	var install bool
-	if err != nil {
-		install = true
-	}
-
-	if bool {
-		// TODO create
-		return
-	}
-
+// Init - инициализация БД.
+func Init(dbFile string, db *sql.DB) error {
 	db, err := sql.Open("sqlite", dbFile)
 	if err != nil {
 		return err
 	}
 	defer db.Close()
 
+	if !checkExist(dbFile) {
+		create(db, schema, index)
+	}
+	return nil
 }
-func createSchemaProcess(db *sql.DB) error {
-	_, err := db.Exec(`
-	CREATE TABLE IF NOT EXISTS processes (
-		id_proc integer PRIMARY KEY AUTOINCREMENT,
-		name_proc text NOT NULL DEFAULT ""  UNIQUE
-	);`)
+
+// checkExist - проверка существование БД.
+func checkExist(dbFile string) bool {
+	_, err := os.Stat(dbFile)
+	if err != nil {
+		return false
+	}
+
+	return true
+}
+
+func create(db *sql.DB, schm string, ind string) error {
+	_, err := db.Exec(schm)
+	if err != nil {
+		return err
+	}
+	_, err = db.Exec(ind)
 	if err != nil {
 		return err
 	}
