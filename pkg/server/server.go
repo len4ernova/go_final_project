@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/len4ernova/go_final_project/pkg/handlers"
+	"github.com/len4ernova/go_final_project/pkg/api"
 	"go.uber.org/zap"
 )
 
@@ -14,14 +14,10 @@ type Settings struct {
 	Port int
 }
 
-const indexHTML = "web/index.html"
-
-const webDir = "../go_final_project/web"
-
 // RunSrv - запустить сервер.
 func RunSrv(logger *zap.Logger, settings *Settings) {
 	// структура с логгером, обработчиками
-	hands := handlers.SrvHand{
+	hands := api.SrvHand{
 		Logger: logger,
 	}
 
@@ -41,6 +37,8 @@ func RunSrv(logger *zap.Logger, settings *Settings) {
 	mux.Handle("/", http.FileServer(http.Dir("./web/")))
 
 	mux.HandleFunc("GET /{$}", hands.Index)
+
+	hands.Init(mux)
 
 	logger.Sugar().Info("Serving on http://%v ...", server.Addr)
 	if err := server.ListenAndServe(); err != nil {

@@ -7,7 +7,7 @@ toolchain go1.24.10
 require (
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/stretchr/testify v1.11.1
-	go.uber.org/zap v1.27.0
+	go.uber.org/zap v1.27.1
 	modernc.org/sqlite v1.40.1
 )
 

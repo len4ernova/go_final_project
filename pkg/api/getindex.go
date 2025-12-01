@@ -1,4 +1,4 @@
-package handlers
+package api
 
 import (
 	"net/http"
@@ -8,7 +8,7 @@ import (
 const indexHTML = "./web/index.html"
 
 func (h *SrvHand) Index(w http.ResponseWriter, r *http.Request) {
-	ts, err := template.ParseFiles("./web/index.html")
+	ts, err := template.ParseFiles(indexHTML)
 	if err != nil {
 		h.Logger.Sugar().Error(err.Error())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
