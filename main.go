@@ -14,8 +14,6 @@ const dfltPort = 7540
 const dfltIp = "127.0.0.1"
 const dfltDB = "scheduler.db"
 
-var PlanDB *sql.DB
-
 func main() {
 	// Настройка логгера: вывода логов в консоль в формате JSON
 	configZap := zap.Config{
@@ -42,17 +40,25 @@ func main() {
 		dbName = dfltDB
 	}
 
-	err = db.Init(dbName, PlanDB)
+	// БД
+	DBplaner, err := sql.Open("sqlite", dbName)
+	if err != nil {
+		logger.Fatal("Didn't open DB.")
+		return
+	}
+	defer DBplaner.Close()
+	err = db.Init(dbName, DBplaner)
 	if err != nil {
 		logger.Sugar().Fatalf("DB initialization error: %v", err)
 	}
 
+	// настройки сервера
 	settingsSrv := server.Settings{
 		Ip:   dfltIp,
 		Port: port,
 	}
 
-	server.RunSrv(logger, &settingsSrv)
+	server.RunSrv(logger, &settingsSrv, DBplaner)
 	// if err != nil {
 	// 	logger.Fatal(err.Error())
 	// }

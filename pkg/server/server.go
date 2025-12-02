@@ -1,6 +1,7 @@
 package server
 
 import (
+	"database/sql"
 	"net/http"
 	"strconv"
 	"time"
@@ -15,10 +16,11 @@ type Settings struct {
 }
 
 // RunSrv - запустить сервер.
-func RunSrv(logger *zap.Logger, settings *Settings) {
+func RunSrv(logger *zap.Logger, settings *Settings, dbPlan *sql.DB) {
 	// структура с логгером, обработчиками
 	hands := api.SrvHand{
 		Logger: logger,
+		DB:     dbPlan,
 	}
 
 	// создание своего сервера

@@ -18,14 +18,10 @@ const schema = `
 	);`
 const index = `CREATE INDEX schedule_date ON scheduler (date);`
 
+var PlanDB *sql.DB
+
 // Init - инициализация БД.
 func Init(dbFile string, db *sql.DB) error {
-	db, err := sql.Open("sqlite", dbFile)
-	if err != nil {
-		return err
-	}
-	defer db.Close()
-
 	if !checkExist(dbFile) {
 		create(db, schema, index)
 	}

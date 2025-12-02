@@ -42,7 +42,7 @@ func (h *SrvHand) nextDayHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func NextDate(now time.Time, dstart string, repeat string) (string, error) {
-	// ?
+	fmt.Printf("now: %v\ndstar: %v\nrepeat: %v\n", now, dstart, repeat)
 	if len(repeat) == 0 {
 		return "", fmt.Errorf("expected to receive a rule repeat")
 	}
@@ -55,9 +55,6 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 	// repeat rules
 	if repeat == "y" {
 		result := addYear(now, date)
-		if err != nil {
-			return "", fmt.Errorf("couldn't add a year: %v", err)
-		}
 		return result, nil
 	}
 
@@ -97,12 +94,12 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 	// }
 
 	// return nxtDate.Format(pattern), nil
-	return "", fmt.Errorf("unknown repeat value")
+	return "", fmt.Errorf("unknown repeat value: %v", repeat)
 }
 
-// проверка не выходит ли за диапазон
+// afterNow - возвращает true, если первая дата больше второй
 func afterNow(date time.Time, now time.Time) bool {
-	if date.Compare(now) > 0 {
+	if date.Compare(now) >= 0 {
 		return true
 	}
 	return false
@@ -172,7 +169,7 @@ func addWeekDays(rpt string, now time.Time, dstart time.Time) (string, error) {
 			break
 		}
 	}
-	fmt.Printf("p1: ", p1)
+	fmt.Printf("p1: %v", p1)
 	// p2 - сдвиги для циклического увеличения.
 	// Составляется по заданным данным, количество дней до следующего заданного дня недели.
 	p2 := make([]int, countX)
