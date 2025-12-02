@@ -14,5 +14,6 @@ const pattern = "20060102"
 
 func (h *SrvHand) Init(mux *http.ServeMux) {
 	mux.HandleFunc("/api/nextdate", h.nextDayHandler)
+	mux.HandleFunc("POST /api/task", h.taskHandler)
 
 }
