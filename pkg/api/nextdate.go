@@ -99,7 +99,7 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 
 // afterNow - возвращает true, если первая дата больше второй
 func afterNow(date time.Time, now time.Time) bool {
-	if date.Compare(now) >= 0 {
+	if date.Year() > now.Year() && date.Month() > now.Month() && date.Day() > now.Day() {
 		return true
 	}
 	return false

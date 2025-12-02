@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -42,7 +43,7 @@ func (h *SrvHand) addTaskHandler(w http.ResponseWriter, r *http.Request) {
 		writeJson(w, reterror{Error: "value of <title> was empty"})
 		return
 	}
-	err = checkDate(&task)
+	err = checkDate(h.DB, &task)
 	if err != nil {
 		writeJson(w, reterror{Error: err.Error()})
 		return
@@ -58,7 +59,6 @@ func (h *SrvHand) addTaskHandler(w http.ResponseWriter, r *http.Request) {
 		Id: strconv.Itoa(int(idTask)),
 	}
 	writeJson(w, result)
-
 }
 
 // retErr - возврат ошибки.
@@ -73,11 +73,12 @@ func writeJson(w http.ResponseWriter, data any) {
 }
 
 // checkDate - проверить на корректность полученное значение task.Date.
-func checkDate(task *db.Task) error {
+func checkDate(planDB *sql.DB, task *db.Task) error {
 	now := time.Now()
 
 	if len(task.Date) == 0 {
 		task.Date = now.Format(pattern)
+		fmt.Println("task.Date: ", task.Date)
 	}
 
 	t, err := time.Parse(pattern, task.Date)
@@ -92,7 +93,8 @@ func checkDate(task *db.Task) error {
 		}
 	}
 
-	if !afterNow(now, t) {
+	fmt.Println("now, t: ", now, t, "task.Repeat", task.Repeat)
+	if afterNow(now, t) {
 		if task.Repeat == "" {
 
 			// если правила повторения нет, то берём сегодняшнее число
@@ -102,6 +104,7 @@ func checkDate(task *db.Task) error {
 			// в противном случае, берём вычисленную ранее следующую дату
 
 			task.Date = next
+
 			fmt.Println("!!!", task)
 
 		}
