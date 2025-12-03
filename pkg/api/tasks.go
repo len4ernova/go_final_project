@@ -1,17 +1,20 @@
 package api
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/len4ernova/go_final_project/pkg/db"
+)
 
 type TasksResp struct {
 	Tasks []*db.Task `json:"tasks"`
 }
 
 func (h *SrvHand) tasksHandler(w http.ResponseWriter, r *http.Request) {
-	tasks, err := db.Tasks(50) // в параметре максимальное количество записей
+	tasks, err := db.Tasks(h.DB, 50) // в параметре максимальное количество записей
 	if err != nil {
-		// здесь вызываете функцию, которая возвращает ошибку в JSON
-		// её желательно было реализовать на предыдущем шаге
-		// ...
+		// возвращает ошибку в JSON
+		writeJson(w, reterror{Error: err.Error()})
 		return
 	}
 	writeJson(w, TasksResp{

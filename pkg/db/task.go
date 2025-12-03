@@ -37,9 +37,25 @@ func AddTask(db *sql.DB, task *Task) (int64, error) {
 	return id, err
 }
 
-func Tasks(limit int) ([]*Task, error) {
-
-	// избежать {"tasks":null} в ответе JSON, следите за результирующим слайсом.
-	//  Если он равен nil, нужно создавать пустой слайс.
-	//  В этом случае ответ будет {"tasks":[]}
+func Tasks(db *sql.DB, limit int) ([]*Task, error) {
+	query := `SELECT * FROM scheduler`
+	tasks := []*Task{}
+	rows, err := db.Query(query)
+	if err != nil {
+		return []*Task{}, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var t Task
+		err := rows.Scan(&t.ID, &t.Date, &t.Title, &t.Comment, &t.Repeat)
+		if err != nil {
+			return []*Task{}, err
+		}
+		tasks = append(tasks, &t)
+	}
+	return tasks, nil
 }
+
+// избежать {"tasks":null} в ответе JSON, следите за результирующим слайсом.
+//  Если он равен nil, нужно создавать пустой слайс.
+//  В этом случае ответ будет {"tasks":[]}
