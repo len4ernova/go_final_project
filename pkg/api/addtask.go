@@ -80,11 +80,12 @@ func checkDate(planDB *sql.DB, task *db.Task) error {
 		task.Date = now.Format(pattern)
 		fmt.Println("task.Date: ", task.Date)
 	}
-
+	fmt.Println("time - ", task.Date)
 	t, err := time.Parse(pattern, task.Date)
 	if err != nil {
 		return err
 	}
+	fmt.Println("t", t)
 	var next string
 	if len(task.Repeat) != 0 {
 		next, err = NextDate(now, task.Date, task.Repeat)
@@ -92,23 +93,25 @@ func checkDate(planDB *sql.DB, task *db.Task) error {
 			return err
 		}
 	}
-
-	fmt.Println("now, t: ", now, t, "task.Repeat", task.Repeat)
+	fmt.Println("next = ", next)
+	fmt.Println("now: ", now, "task.Repeat", task.Repeat)
+	fmt.Printf("afterNow(%v, %v) = %v\n", now, t, afterNow(now, t))
 	if afterNow(now, t) {
 		if task.Repeat == "" {
 
 			// если правила повторения нет, то берём сегодняшнее число
 			task.Date = now.Format(pattern)
-			fmt.Println("!!!", task)
+			fmt.Println("!!!", task.Date)
 		} else {
 			// в противном случае, берём вычисленную ранее следующую дату
 
 			task.Date = next
 
-			fmt.Println("!!!", task)
+			fmt.Println("!!!", task.Date)
 
 		}
 	}
+	fmt.Println("@@@ Task ", task)
 
 	return nil
 }

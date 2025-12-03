@@ -99,7 +99,13 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 
 // afterNow - возвращает true, если первая дата больше второй
 func afterNow(date time.Time, now time.Time) bool {
-	if date.Year() > now.Year() && date.Month() > now.Month() && date.Day() > now.Day() {
+	if date.Year() > now.Year() {
+		return true
+	}
+	if date.Year() >= now.Year() && date.Month() > now.Month() {
+		return true
+	}
+	if date.Year() >= now.Year() && date.Month() >= now.Month() && date.Day() > now.Day() {
 		return true
 	}
 	return false
@@ -109,10 +115,13 @@ func afterNow(date time.Time, now time.Time) bool {
 func addYear(now time.Time, dstart time.Time) string {
 	nxtDate := dstart.AddDate(1, 0, 0)
 	for {
+
 		if afterNow(nxtDate, now) {
 			break
 		}
 		nxtDate = nxtDate.AddDate(1, 0, 0)
+		fmt.Println(nxtDate)
+		fmt.Printf("afterNow(%v, %v) = %v\n", nxtDate, now)
 	}
 	return nxtDate.Format(pattern)
 }
@@ -121,10 +130,12 @@ func addYear(now time.Time, dstart time.Time) string {
 func addDays(now time.Time, dstart time.Time, count int) string {
 	nxtDate := dstart.AddDate(0, 0, count)
 	for {
+
 		if afterNow(nxtDate, now) {
 			break
 		}
 		nxtDate = nxtDate.AddDate(0, 0, count)
+		fmt.Println("nxtDate:", nxtDate, "now:", now, afterNow(nxtDate, now))
 	}
 	return nxtDate.Format(pattern)
 }

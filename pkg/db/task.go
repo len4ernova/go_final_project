@@ -15,7 +15,6 @@ type Task struct {
 
 // AddTask - добавление задачи в таблицу scheduler и возврат идентификатора добавленной записи.
 func AddTask(db *sql.DB, task *Task) (int64, error) {
-	var id int64
 
 	// определите запрос
 	fmt.Println("task.Date, task.Title, task.Comment, task.Repeat:", task.Date, task.Title, task.Comment, task.Repeat)
@@ -31,9 +30,16 @@ func AddTask(db *sql.DB, task *Task) (int64, error) {
 		sql.Named("comment", task.Comment),
 		sql.Named("repeat", task.Repeat))
 	if err != nil {
-		id, err = res.LastInsertId()
+		return 0, err
 	}
-	fmt.Println(id)
+	id, err := res.LastInsertId()
 
 	return id, err
+}
+
+func Tasks(limit int) ([]*Task, error) {
+
+	// избежать {"tasks":null} в ответе JSON, следите за результирующим слайсом.
+	//  Если он равен nil, нужно создавать пустой слайс.
+	//  В этом случае ответ будет {"tasks":[]}
 }

@@ -23,7 +23,7 @@ var PlanDB *sql.DB
 // Init - инициализация БД.
 func Init(dbFile string, db *sql.DB) error {
 	if !checkExist(dbFile) {
-		create(db, schema, index)
+		create(db, schema+index)
 	}
 	return nil
 }
@@ -38,12 +38,9 @@ func checkExist(dbFile string) bool {
 	return true
 }
 
-func create(db *sql.DB, schm string, ind string) error {
+// create - выполнить запрос к БД.
+func create(db *sql.DB, schm string) error {
 	_, err := db.Exec(schm)
-	if err != nil {
-		return err
-	}
-	_, err = db.Exec(ind)
 	if err != nil {
 		return err
 	}
