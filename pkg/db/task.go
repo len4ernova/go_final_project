@@ -59,7 +59,6 @@ func Tasks(db *sql.DB, limit int) ([]*Task, error) {
 	for rows.Next() {
 		var t Task
 		err := rows.Scan(&t.ID, &t.Date, &t.Title, &t.Comment, &t.Repeat)
-		fmt.Println("Task from DB", t)
 		if err != nil {
 			return []*Task{}, err
 		}
@@ -68,10 +67,6 @@ func Tasks(db *sql.DB, limit int) ([]*Task, error) {
 	fmt.Println("DB tasks", tasks)
 	return tasks, nil
 }
-
-// избежать {"tasks":null} в ответе JSON, следите за результирующим слайсом.
-//  Если он равен nil, нужно создавать пустой слайс.
-//  В этом случае ответ будет {"tasks":[]}
 
 func TasksSearch(db *sql.DB, limit int, srchDate string, isDate bool) ([]*Task, error) {
 	fmt.Println("START TasksSearch", srchDate, isDate)
@@ -93,7 +88,6 @@ func TasksSearch(db *sql.DB, limit int, srchDate string, isDate bool) ([]*Task, 
 	for rows.Next() {
 		var t Task
 		err := rows.Scan(&t.ID, &t.Date, &t.Title, &t.Comment, &t.Repeat)
-		fmt.Println("Task from DB", t.ID, t.Date, t.Title, t.Comment, t.Repeat)
 		if err != nil {
 			return []*Task{}, err
 		}
@@ -102,4 +96,44 @@ func TasksSearch(db *sql.DB, limit int, srchDate string, isDate bool) ([]*Task, 
 	fmt.Println("DB tasks", tasks)
 	return tasks, nil
 
+}
+
+// GetTask - запросить задачу из таблицы scheduler по id.
+func GetTask(db *sql.DB, id int) (*Task, error) {
+	query := `SELECT * FROM scheduler WHERE id = :id`
+	var t Task
+	err := db.QueryRow(query, sql.Named(id)).Scan(&t.ID, &t.Date, &t.Title, &t.Comment, &t.Repeat)
+	if err != nil {
+		return *Task{}, err
+	}
+	fmt.Println("DB tasks", tasks)
+	return t, nil
+}
+
+// UpdateTask - изменить задачу в таблице scheduler по id.
+func UpdateTask(db *sql.DB, task *Task) error {
+	// параметры пропущены, не забудьте указать WHERE
+	query := `UPDATE scheduler 
+				SET date=:date, title=:title, comment=:comment, repeat=:repeat 
+				WHERE id=:id`
+	res, err := db.Exec(query,
+		sql.Named("id", task.ID),
+		sql.Named("date", task.Date),
+		sql.Named("title", task.Title),
+		sql.Named("comment", task.Comment),
+		sql.Named("repeat", task.Repeat),
+	)
+	if err != nil {
+		return err
+	}
+	// метод RowsAffected() возвращает количество записей к которым
+	// был применена SQL команда
+	count, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if count == 0 {
+		return fmt.Errorf(`incorrect id for updating task`)
+	}
+	return nil
 }
