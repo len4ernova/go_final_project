@@ -6,15 +6,6 @@ import (
 	"strconv"
 )
 
-/*
-	type Task struct {
-		ID      string `json:"id,omitempty"`
-		Date    string `json:"date,omitempty"`
-		Title   string `json:"title"`
-		Comment string `json:"comment,omitempty"`
-		Repeat  string `json:"repeat,omitempty"`
-	}
-*/
 type Task struct {
 	ID      string `json:"id"`
 	Date    string `json:"date"`
@@ -135,5 +126,10 @@ func UpdateTask(db *sql.DB, task *Task) error {
 	if count == 0 {
 		return fmt.Errorf(`incorrect id for updating task`)
 	}
+	return nil
+}
+
+// DeleteTask - удаление задачи по id.
+func DeleteTask(id string) error {
 	return nil
 }
