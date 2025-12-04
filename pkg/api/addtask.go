@@ -1,7 +1,6 @@
 package api
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -39,11 +38,8 @@ func (h *SrvHand) addTaskHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("01", task)
 
 	// Валидация данных
-	if len(task.Title) == 0 {
-		writeJson(w, reterror{Error: "value of <title> was empty"})
-		return
-	}
-	err = checkDate(h.DB, &task)
+
+	err = checkDate(&task)
 	if err != nil {
 		writeJson(w, reterror{Error: err.Error()})
 		return
@@ -73,7 +69,10 @@ func writeJson(w http.ResponseWriter, data any) {
 }
 
 // checkDate - проверить на корректность полученное значение task.Date.
-func checkDate(planDB *sql.DB, task *db.Task) error {
+func checkDate(task *db.Task) error {
+	if len(task.Title) == 0 {
+		return fmt.Errorf("value of <title> was empty")
+	}
 	now := time.Now()
 
 	if len(task.Date) == 0 {

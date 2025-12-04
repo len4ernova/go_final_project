@@ -102,12 +102,12 @@ func TasksSearch(db *sql.DB, limit int, srchDate string, isDate bool) ([]*Task, 
 func GetTask(db *sql.DB, id int) (*Task, error) {
 	query := `SELECT * FROM scheduler WHERE id = :id`
 	var t Task
-	err := db.QueryRow(query, sql.Named(id)).Scan(&t.ID, &t.Date, &t.Title, &t.Comment, &t.Repeat)
+	err := db.QueryRow(query, sql.Named("id", id)).Scan(&t.ID, &t.Date, &t.Title, &t.Comment, &t.Repeat)
 	if err != nil {
-		return *Task{}, err
+		return &Task{}, err
 	}
-	fmt.Println("DB tasks", tasks)
-	return t, nil
+	fmt.Println("DB tasks", t)
+	return &t, nil
 }
 
 // UpdateTask - изменить задачу в таблице scheduler по id.
