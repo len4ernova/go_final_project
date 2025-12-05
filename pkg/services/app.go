@@ -18,10 +18,3 @@ func PortVal(envName string, dfltPort int) (int, error) {
 	}
 	return p, nil
 }
-
-// Path2DB - получение значения путь к БД.
-func Path2DB(envName string) (string, error) {
-	val := os.Getenv(envName)
-	//TODO validator
-	return val, nil
-}

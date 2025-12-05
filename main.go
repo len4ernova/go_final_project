@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"os"
 
 	"github.com/len4ernova/go_final_project/pkg/db"
 	"github.com/len4ernova/go_final_project/pkg/server"
@@ -31,11 +32,7 @@ func main() {
 		return
 	}
 
-	dbName, err := services.Path2DB("TODO_DBFILE")
-	if err != nil {
-		logger.Sugar().Fatalf("wrong TODO_DBFILE value")
-		return
-	}
+	dbName := os.Getenv("TODO_DBFILE")
 	if dbName == "" {
 		dbName = dfltDB
 	}
