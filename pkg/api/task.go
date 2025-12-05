@@ -16,6 +16,7 @@ func (h *SrvHand) getTaskHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(strId)
 	if err != nil {
 		writeJson(w, reterror{Error: err.Error()})
+		return
 	}
 	task, err := db.GetTask(h.DB, id)
 	writeJson(w, task)

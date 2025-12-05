@@ -130,6 +130,13 @@ func UpdateTask(db *sql.DB, task *Task) error {
 }
 
 // DeleteTask - удаление задачи по id.
-func DeleteTask(id string) error {
+func DeleteTask(db *sql.DB, id int) error {
+	query := `DELETE FROM scheduler
+					WHERE id=:id`
+	_, err := db.Exec(query,
+		sql.Named("id", id))
+	if err != nil {
+		return err
+	}
 	return nil
 }

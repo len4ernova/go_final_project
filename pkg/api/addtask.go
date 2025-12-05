@@ -48,16 +48,18 @@ func (h *SrvHand) addTaskHandler(w http.ResponseWriter, r *http.Request) {
 	idTask, err := db.AddTask(h.DB, &task)
 	fmt.Println("11", "idTask: ", idTask)
 	if err != nil {
+		fmt.Println("22")
 		writeJson(w, reterror{Error: err.Error()})
 		return
 	}
 	result := retid{
 		Id: strconv.Itoa(int(idTask)),
 	}
+	fmt.Println("333")
 	writeJson(w, result)
 }
 
-// retErr - возврат ошибки.
+// writeJson - записать json.
 func writeJson(w http.ResponseWriter, data any) {
 	jsondata, err := json.Marshal(data)
 	if err != nil {
