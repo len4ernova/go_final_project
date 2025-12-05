@@ -7,6 +7,7 @@ import (
 
 const indexHTML = "./web/index.html"
 
+// Index - обрботчик "/".
 func (h *SrvHand) Index(w http.ResponseWriter, r *http.Request) {
 	ts, err := template.ParseFiles(indexHTML)
 	if err != nil {

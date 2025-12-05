@@ -1,31 +1,29 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/len4ernova/go_final_project/pkg/db"
 )
 
+// doneTaskHandler - задача выполнена.
 func (h *SrvHand) doneTaskHandler(w http.ResponseWriter, r *http.Request) {
 	strId := r.URL.Query().Get("id")
-	fmt.Println("START /api/task/done", "strId = ", strId, r.Method)
-	//id, err := strconv.Atoi(strId)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	writeJson(w, reterror{Error: err.Error()})
-	// 	return
-	// }
-	task, err := db.GetTask2(h.DB, strId)
+	h.Logger.Sugar().Info("START /api/task/done", r.Method, "strId = ", strId)
+	id, err := strconv.Atoi(strId)
 	if err != nil {
-		fmt.Println(err)
 		writeJson(w, reterror{Error: err.Error()})
 		return
 	}
-	fmt.Println(task)
+	task, err := db.GetTask(h.DB, id)
+	if err != nil {
+		writeJson(w, reterror{Error: err.Error()})
+		return
+	}
 	if len(task.Repeat) == 0 {
-		err := db.DeleteTask2(h.DB, strId)
+		err := db.DeleteTask(h.DB, id)
 		if err != nil {
 			writeJson(w, reterror{Error: err.Error()})
 			return
@@ -35,7 +33,6 @@ func (h *SrvHand) doneTaskHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	now := time.Now()
 	nextdate, err := NextDate(now, task.Date, task.Repeat)
-	fmt.Println("nextdate = ", nextdate, " task.Date, task.Repeat:", task.Date, task.Repeat)
 	if err != nil {
 		writeJson(w, struct{}{})
 		return

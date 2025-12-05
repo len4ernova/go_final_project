@@ -10,9 +10,10 @@ import (
 	"github.com/len4ernova/go_final_project/pkg/db"
 )
 
+// getTaskHandler - вернуть задачу по ID.
 func (h *SrvHand) getTaskHandler(w http.ResponseWriter, r *http.Request) {
 	strId := r.URL.Query().Get("id")
-	fmt.Println("START: /api/task", strId, r.Method)
+	h.Logger.Sugar().Info("START: /api/task", strId, r.Method)
 	id, err := strconv.Atoi(strId)
 	if err != nil {
 		writeJson(w, reterror{Error: err.Error()})
@@ -26,8 +27,9 @@ func (h *SrvHand) getTaskHandler(w http.ResponseWriter, r *http.Request) {
 	writeJson(w, task)
 }
 
+// putTaskHandler - изменить задачу по ID.
 func (h *SrvHand) putTaskHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("START /api/task", r.Method)
+	h.Logger.Sugar().Info("START /api/task", r.Method)
 	// Десериализация полученного запроса
 	body, err := io.ReadAll(r.Body)
 	if err != nil {

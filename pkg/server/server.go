@@ -47,7 +47,3 @@ func RunSrv(logger *zap.Logger, settings *Settings, dbPlan *sql.DB) {
 		logger.Sugar().Fatal(err)
 	}
 }
-
-//read:
-//let's go
-//Параллелизм в Go Кэтрин Кокс-Будай Изучение Go Джона Боднера

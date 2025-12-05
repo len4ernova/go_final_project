@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -17,12 +16,11 @@ type TasksResp struct {
 	Tasks []*db.Task `json:"tasks"`
 }
 
+// tasksHandler - вернуть список ближайших задач.
 func (h *SrvHand) tasksHandler(w http.ResponseWriter, r *http.Request) {
 	var tasks []*db.Task
-
-	fmt.Println("START  /api/tasks ", r.Method)
+	h.Logger.Sugar().Info("START /api/tasks ", r.Method)
 	search := r.URL.Query().Get("search")
-	fmt.Printf("%T %v\n", search, search)
 	if len(search) > 0 {
 		srchDate, err := verifySearchDate(search)
 		if err != nil {

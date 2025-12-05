@@ -9,13 +9,12 @@ import (
 	"time"
 )
 
-// nextDayHandler - получаем следующую дату (= сдвигу + дата создания).
+// nextDayHandler - рассчитать следующую дату (= сдвигу + дата создания).
 func (h *SrvHand) nextDayHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("START /api/nextdate ", r.Method)
+	h.Logger.Sugar().Info("START /api/nextdate ", r.Method)
 	now := r.FormValue("now")
 	date := r.FormValue("date")
 	repeat := r.FormValue("repeat")
-	fmt.Println(len(now), date, repeat)
 
 	var nowTime time.Time
 	if now == "" {
@@ -25,7 +24,8 @@ func (h *SrvHand) nextDayHandler(w http.ResponseWriter, r *http.Request) {
 		nowTime, err = time.Parse(pattern, now)
 		if err != nil {
 			h.Logger.Sugar().Errorf("date(<now>) conversion error: %v", err)
-			http.Error(w, "date(<now>) conversion error", http.StatusOK)
+			//http.Error(w, "date(<now>) conversion error", http.StatusOK)
+			writeJson(w, reterror{Error: "date(<now>) conversion error"})
 			return
 		}
 	}
@@ -33,7 +33,9 @@ func (h *SrvHand) nextDayHandler(w http.ResponseWriter, r *http.Request) {
 	nxtDate, err := NextDate(nowTime, date, repeat)
 	if err != nil {
 		h.Logger.Sugar().Errorf("didn't get next date: %v", err)
-		http.Error(w, err.Error(), http.StatusOK)
+		//http.Error(w, err.Error(), http.StatusOK)
+		writeJson(w, reterror{Error: fmt.Sprintf("didn't get next date: %v", err)})
+
 		return
 	}
 
