@@ -3,7 +3,6 @@ package api
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/len4ernova/go_final_project/pkg/db"
@@ -11,22 +10,22 @@ import (
 
 func (h *SrvHand) doneTaskHandler(w http.ResponseWriter, r *http.Request) {
 	strId := r.URL.Query().Get("id")
-	fmt.Println("START doneTaskHandler", "strId = ", strId)
-	id, err := strconv.Atoi(strId)
-	if err != nil {
-		fmt.Println(err)
-		writeJson(w, reterror{Error: err.Error()})
-		return
-	}
-	task, err := db.GetTask(h.DB, id)
+	fmt.Println("START /api/task/done", "strId = ", strId, r.Method)
+	//id, err := strconv.Atoi(strId)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	writeJson(w, reterror{Error: err.Error()})
+	// 	return
+	// }
+	task, err := db.GetTask2(h.DB, strId)
 	if err != nil {
 		fmt.Println(err)
 		writeJson(w, reterror{Error: err.Error()})
 		return
 	}
 	fmt.Println(task)
-	if len(task.Repeat) != 0 {
-		err := db.DeleteTask(h.DB, id)
+	if len(task.Repeat) == 0 {
+		err := db.DeleteTask2(h.DB, strId)
 		if err != nil {
 			writeJson(w, reterror{Error: err.Error()})
 			return

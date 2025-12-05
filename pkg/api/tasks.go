@@ -20,7 +20,7 @@ type TasksResp struct {
 func (h *SrvHand) tasksHandler(w http.ResponseWriter, r *http.Request) {
 	var tasks []*db.Task
 
-	fmt.Println("START tasksHandler")
+	fmt.Println("START  /api/tasks ", r.Method)
 	search := r.URL.Query().Get("search")
 	fmt.Printf("%T %v\n", search, search)
 	if len(search) > 0 {

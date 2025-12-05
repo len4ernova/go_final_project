@@ -27,6 +27,7 @@ type retid struct {
 }
 
 func (h *SrvHand) addTaskHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("START /api/task", r.Method)
 	// Десериализация полученного запроса
 	body, err := io.ReadAll(r.Body)
 	if err != nil {

@@ -12,17 +12,22 @@ import (
 
 func (h *SrvHand) getTaskHandler(w http.ResponseWriter, r *http.Request) {
 	strId := r.URL.Query().Get("id")
-	fmt.Println("START: getTaskHandler", strId)
+	fmt.Println("START: /api/task", strId, r.Method)
 	id, err := strconv.Atoi(strId)
 	if err != nil {
 		writeJson(w, reterror{Error: err.Error()})
 		return
 	}
 	task, err := db.GetTask(h.DB, id)
+	if err != nil {
+		writeJson(w, reterror{Error: err.Error()})
+		return
+	}
 	writeJson(w, task)
 }
 
 func (h *SrvHand) putTaskHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("START /api/task", r.Method)
 	// Десериализация полученного запроса
 	body, err := io.ReadAll(r.Body)
 	if err != nil {

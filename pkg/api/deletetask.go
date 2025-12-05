@@ -10,12 +10,15 @@ import (
 
 func (h *SrvHand) deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 	strId := r.URL.Query().Get("id")
-	fmt.Println("START deleteTaskHandler", "strId = ", strId)
+	fmt.Println("START /api/task", "strId = ", strId, r.Method)
+	if len(strId) == 0 {
+		writeJson(w, reterror{Error: "empty value <id>"})
+		return
+	}
 	id, err := strconv.Atoi(strId)
 	if err != nil {
 		fmt.Println(err)
-		//writeJson(w, reterror{Error: err.Error()})
-		writeJson(w, struct{}{})
+		writeJson(w, reterror{Error: err.Error()})
 		return
 	}
 	err = db.DeleteTask(h.DB, id)

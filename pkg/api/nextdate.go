@@ -11,7 +11,7 @@ import (
 
 // nextDayHandler - получаем следующую дату (= сдвигу + дата создания).
 func (h *SrvHand) nextDayHandler(w http.ResponseWriter, r *http.Request) {
-
+	fmt.Println("START /api/nextdate ", r.Method)
 	now := r.FormValue("now")
 	date := r.FormValue("date")
 	repeat := r.FormValue("repeat")

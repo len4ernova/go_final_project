@@ -55,7 +55,7 @@ func Tasks(db *sql.DB, limit int) ([]*Task, error) {
 		}
 		tasks = append(tasks, &t)
 	}
-	fmt.Println("DB tasks", tasks)
+	fmt.Println("Tasks: DB tasks", tasks)
 	return tasks, nil
 }
 
@@ -84,7 +84,7 @@ func TasksSearch(db *sql.DB, limit int, srchDate string, isDate bool) ([]*Task, 
 		}
 		tasks = append(tasks, &t)
 	}
-	fmt.Println("DB tasks", tasks)
+	fmt.Println("TasksSearch: DB tasks", tasks)
 	return tasks, nil
 
 }
@@ -97,12 +97,23 @@ func GetTask(db *sql.DB, id int) (*Task, error) {
 	if err != nil {
 		return &Task{}, err
 	}
-	fmt.Println("DB tasks", t)
+	fmt.Println("GetTask: DB tasks", t)
+	return &t, nil
+}
+func GetTask2(db *sql.DB, id string) (*Task, error) {
+	query := `SELECT * FROM scheduler WHERE id = :id`
+	var t Task
+	err := db.QueryRow(query, sql.Named("id", id)).Scan(&t.ID, &t.Date, &t.Title, &t.Comment, &t.Repeat)
+	if err != nil {
+		return &Task{}, err
+	}
+	fmt.Println("GetTask: DB tasks", t)
 	return &t, nil
 }
 
 // UpdateTask - изменить задачу в таблице scheduler по id.
 func UpdateTask(db *sql.DB, task *Task) error {
+	fmt.Println("Update Task", task)
 	// параметры пропущены, не забудьте указать WHERE
 	query := `UPDATE scheduler 
 				SET date=:date, title=:title, comment=:comment, repeat=:repeat 
@@ -131,6 +142,16 @@ func UpdateTask(db *sql.DB, task *Task) error {
 
 // DeleteTask - удаление задачи по id.
 func DeleteTask(db *sql.DB, id int) error {
+	query := `DELETE FROM scheduler
+					WHERE id=:id`
+	_, err := db.Exec(query,
+		sql.Named("id", id))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func DeleteTask2(db *sql.DB, id string) error {
 	query := `DELETE FROM scheduler
 					WHERE id=:id`
 	_, err := db.Exec(query,
