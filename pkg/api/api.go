@@ -1,11 +1,12 @@
 package api
 
 import (
+	"crypto/sha256"
 	"database/sql"
-	"fmt"
 	"net/http"
 	"os"
 
+	"github.com/len4ernova/go_final_project/pkg/services"
 	"go.uber.org/zap"
 )
 
@@ -32,18 +33,29 @@ func (h *SrvHand) Init(mux *http.ServeMux) {
 func auth(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// смотрим наличие пароля
-		pass := os.Getenv("TODO_PASSWORD")
-		if len(pass) > 0 {
-			var jwt string // JWT-токен из куки
+		passEnv := os.Getenv("TODO_PASSWORD")
+		if len(passEnv) > 0 {
+			var jwtCookie string // JWT-токен из куки
 			// получаем куку
 			cookie, err := r.Cookie("token")
 			if err == nil {
-				jwt = cookie.Value
+				jwtCookie = cookie.Value
 			}
-			fmt.Println("from cookie", jwt)
+			claims, err := services.ParseToken(jwtCookie)
+			if err != nil {
+				http.Error(w, "Неверный токен", http.StatusUnauthorized)
+				return
+			}
+
+			hesh := sha256.Sum256([]byte(passEnv))
+
 			var valid bool
-			// здесь код для валидации и проверки JWT-токена
-			// ...
+			valid = hesh == claims.Hesh
+			// валидация и проверки JWT-токена
+			if valid {
+				next.ServeHTTP(w, r)
+				return
+			}
 
 			if !valid {
 				// возвращаем ошибку авторизации 401

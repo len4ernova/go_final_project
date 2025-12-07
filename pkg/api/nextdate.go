@@ -123,7 +123,7 @@ func addYear(now time.Time, dstart time.Time) string {
 		}
 		nxtDate = nxtDate.AddDate(1, 0, 0)
 		fmt.Println(nxtDate)
-		fmt.Printf("afterNow(%v, %v) = %v\n", nxtDate, now)
+		//fmt.Printf("afterNow(%v, %v) = %v\n", nxtDate, now)
 	}
 	return nxtDate.Format(pattern)
 }
