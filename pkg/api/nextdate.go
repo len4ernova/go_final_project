@@ -32,7 +32,6 @@ func (h *SrvHand) nextDayHandler(w http.ResponseWriter, r *http.Request) {
 		nowTime, err = time.Parse(pattern, now)
 		if err != nil {
 			h.Logger.Sugar().Errorf("date(<now>) conversion error: %v", err)
-			//http.Error(w, "date(<now>) conversion error", http.StatusOK)
 			writeJson(w, reterror{Error: "date(<now>) conversion error"})
 			return
 		}
@@ -41,9 +40,7 @@ func (h *SrvHand) nextDayHandler(w http.ResponseWriter, r *http.Request) {
 	nxtDate, err := NextDate(nowTime, date, repeat)
 	if err != nil {
 		h.Logger.Sugar().Errorf("didn't get next date: %v", err)
-		//http.Error(w, err.Error(), http.StatusOK)
 		writeJson(w, reterror{Error: fmt.Sprintf("didn't get next date: %v", err)})
-
 		return
 	}
 
@@ -51,8 +48,9 @@ func (h *SrvHand) nextDayHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// NextDate - находит ближайшую дату срабатывания.
 func NextDate(now time.Time, dstart string, repeat string) (string, error) {
-	fmt.Printf("now: %v\ndstar: %v\nrepeat: %v\n", now, dstart, repeat)
+	//	fmt.Printf("now: %v\ndstar: %v\nrepeat: %v\n", now, dstart, repeat)
 	if len(repeat) == 0 {
 		return "", fmt.Errorf("expected to receive a rule repeat")
 	}
@@ -95,6 +93,7 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 		}
 		return result, nil
 	}
+	// m ...
 	if m, _ := regexp.MatchString(`^m `, repeat); m {
 		result, err := nextMonthDay(now, date, repeat)
 		if err != nil {
@@ -103,7 +102,6 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 		return result, nil
 	}
 
-	// return nxtDate.Format(pattern), nil
 	return "", fmt.Errorf("unknown repeat value: %v", repeat)
 }
 
@@ -125,13 +123,11 @@ func afterNow(date time.Time, now time.Time) bool {
 func addYear(now time.Time, dstart time.Time) string {
 	nxtDate := dstart.AddDate(1, 0, 0)
 	for {
-
 		if afterNow(nxtDate, now) {
 			break
 		}
 		nxtDate = nxtDate.AddDate(1, 0, 0)
-		fmt.Println(nxtDate)
-		//fmt.Printf("afterNow(%v, %v) = %v\n", nxtDate, now)
+		// fmt.Println(nxtDate)
 	}
 	return nxtDate.Format(pattern)
 }
@@ -140,18 +136,17 @@ func addYear(now time.Time, dstart time.Time) string {
 func addDays(now time.Time, dstart time.Time, count int) string {
 	nxtDate := dstart.AddDate(0, 0, count)
 	for {
-
 		if afterNow(nxtDate, now) {
 			break
 		}
 		nxtDate = nxtDate.AddDate(0, 0, count)
-		fmt.Println("nxtDate:", nxtDate, "now:", now, afterNow(nxtDate, now))
+		//fmt.Println("nxtDate:", nxtDate, "now:", now, afterNow(nxtDate, now))
 	}
 	return nxtDate.Format(pattern)
 }
 
 // nextWeekDay - рассчитать следующую дату.
-func nextWeekDay(now time.Time, repeat string) (string, error) {
+func nextWeekDay(now time.Time, dstart time.Time, repeat string) (string, error) {
 	// формирование дней недели из repeat
 	checkDays, err := getRepeatValues(repeat)
 	if err != nil {
@@ -166,27 +161,38 @@ func nextWeekDay(now time.Time, repeat string) (string, error) {
 		matrixWeek[item-1] = 1
 	}
 
-	date := now.AddDate(0, 0, 2)
-	fmt.Println(int(date.Weekday()), date.Day(), "\n", matrixWeek)
-	for {
-		date = date.AddDate(0, 0, 1)
-		i := int(date.Weekday())
-		fmt.Println(date, date.Weekday(), i)
+	var nxtDate time.Time
+	date := time.Now()
+	if afterNow(date, dstart) {
+		nxtDate = date
+	} else {
+		nxtDate = dstart.AddDate(0, 0, 2)
+	}
 
-		if int(date.Weekday()) == 0 {
+	// fmt.Println(int(nxtDate.Weekday()), nxtDate.Day(), "\n", matrixWeek)
+	for {
+		nxtDate = nxtDate.AddDate(0, 0, 1)
+		i := int(nxtDate.Weekday())
+		// fmt.Println(nxtDate, nxtDate.Weekday(), i)
+
+		if int(nxtDate.Weekday()) == 0 {
 			// Sunday
 			if matrixWeek[6] == 1 {
-				break
+				if afterNow(nxtDate, now) {
+					break
+				}
 			}
 		} else {
 			// Monday-Saturday
 			if matrixWeek[i-1] == 1 {
-				break
+				if afterNow(nxtDate, now) {
+					break
+				}
 			}
 		}
 	}
 
-	return date.Format(pattern), nil
+	return nxtDate.Format(pattern), nil
 }
 func getRepeatValues(repeat string) ([]int, error) {
 	if len(repeat) == 0 {
@@ -215,18 +221,28 @@ func getRepeatValues(repeat string) ([]int, error) {
 	return checkDays, nil
 }
 
-func nextMonthDay(now time.Time, repeat string) (string, error) {
+func nextMonthDay(now time.Time, dstart time.Time, repeat string) (string, error) {
 	// формирование дней недели из repeat
-	date := now
+	currentDate := time.Now()
+	var date time.Time
+	if afterNow(currentDate, dstart) {
+		date = currentDate
+	} else {
+		date = dstart
+	}
 
+	// разбираем repeat и выбираем месяцы и дни
 	checkDays, checkMonth, err := getRepeatValuesMoth(repeat)
 	if err != nil {
 		return "", err
 	}
-	fmt.Println(checkMonth, checkDays)
+	// fmt.Println(checkMonth, checkDays)
+
+	// формирование вспомогательных матриц: месяцы(13 элементов), 12х32 - дни.
 	matrixMonth := make([]int, maxMonth+1)
 	var matrixDays [][]int
 
+	// заполнение матрицы месяцы: если в правиле не указан месяц, то всем месяцам [1-12] = 1; иначе руководствоваться правилом
 	if len(checkMonth) == 0 {
 		for k := 1; k < len(matrixMonth); k++ {
 			matrixMonth[k] = 1
@@ -237,21 +253,22 @@ func nextMonthDay(now time.Time, repeat string) (string, error) {
 		}
 	}
 	currentMonth := int(date.Month())
-	for monthNumber, item := range matrixMonth {
-		// соотв-ему месяцу (==1) создадим слайс нужной длины
-		if item == 1 {
+	// обход матрицы месяцев, если параметр == 0, то в соответсующей матрице дней установим []int{}.
+	// иначе оценим праметры правила, и соответствующим дням правила установим 1.
+	for monthNumber, isMonth := range matrixMonth {
+
+		if isMonth == 1 {
+			// определяем год, берём на основе значения now. Год нужен для нахождения высокосного года.
 			var year int
 			if monthNumber < currentMonth {
-				year = date.Year()
+				year = now.Year()
 			} else {
-				year = date.Year() + 1
+				year = now.Year() + 1
 			}
-			length := getDaysInMonth(year, time.Month(monthNumber))
+			length := getDaysInMonth(year, time.Month(monthNumber)) // кол-во дней в месяце
 
-			fmt.Println(year, (monthNumber))
-
-			//выделим 31 элемент, но -1, -2 - установим 1 назначим соотв-ому дню
-
+			//выделим 32 элемента на матрицу дней.
+			// -1, -2 - установим 1, для остальных назначим 1 соотв-ому дню правила
 			days := make([]int, maxDaysInMonth+1)
 
 			for _, daysNumber := range checkDays {
@@ -263,13 +280,6 @@ func nextMonthDay(now time.Time, repeat string) (string, error) {
 				default:
 					days[daysNumber] = 1
 				}
-				// if daysNumber == -1 {
-				// 	days[length] = 1
-				// } else if daysNumber == -2 {
-				// 	days[length-1] = 1
-				// } else {
-				// 	days[daysNumber] = 1
-				// }
 			}
 			matrixDays = append(matrixDays, days)
 		} else {
@@ -277,59 +287,21 @@ func nextMonthDay(now time.Time, repeat string) (string, error) {
 			matrixDays = append(matrixDays, days)
 		}
 	}
-	fmt.Println("matrixMonth: ", matrixMonth)
-	fmt.Println("matrixDays: ", matrixDays)
-
-	// for _, item := range checkDays {
-	// 	if item == -1 {
-	// 		matrixDays[matrixDays[]] = 1
-	// 	}
-	// 	matrixDays[item] = 1
-	// }
 
 	for {
 		date = date.AddDate(0, 0, 1)
 		m := int(date.Month())
 		day := date.Day()
-		fmt.Println(m, day)
 		if matrixMonth[m] == 1 {
 			if matrixDays[m][day] == 1 {
-				break
+				if afterNow(date, now) {
+					break
+				}
 			}
 		}
 	}
 
 	return date.Format(pattern), nil
-	// создадим одномерную матрицу по кол-ву дней недели.
-	// в те дни, в которые должна быть назначена задача поставим 1.
-	//
-	// matrixWeek := make([]int, numDays)
-
-	// for _, item := range checkDays {
-	// 	matrixWeek[item-1] = 1
-	// }
-
-	// date := time.Now().AddDate(0, 0, 2)
-	// fmt.Println(int(date.Weekday()), date.Day(), "\n", matrixWeek)
-	// for {
-	// 	date = date.AddDate(0, 0, 1)
-	// 	i := int(date.Weekday())
-	// 	fmt.Println(date, date.Weekday(), i)
-
-	// 	if int(date.Weekday()) == 0 {
-	// 		// Sunday
-	// 		if matrixWeek[6] == 1 {
-	// 			break
-	// 		}
-	// 	} else {
-	// 		// Monday-Saturday
-	// 		if matrixWeek[i-1] == 1 {
-	// 			break
-	// 		}
-	// 	}
-	// }
-
-	// return date.Format(pattern), nil
 }
 func getDaysInMonth(year int, month time.Month) int {
 	// Находим первый день текущего месяца
@@ -392,6 +364,7 @@ func getDaysMnth(rptValues string) ([]int, error) {
 	return checkDays, nil
 }
 
+// getDaysAndMonths - выбрать дни и месяцы для правила <m ..>
 func getDaysAndMonths(rptdays string, rptmon string) ([]int, []int, error) {
 	days, err := getDaysMnth(rptdays)
 	if err != nil {
@@ -404,6 +377,8 @@ func getDaysAndMonths(rptdays string, rptmon string) ([]int, []int, error) {
 	return days, months, nil
 
 }
+
+// getMonths - выбрать месяцы для правила <m ..>
 func getMonths(rptValues string) ([]int, error) {
 	months := strings.Split(rptValues, ",")
 	if len(months) == 0 {

@@ -32,9 +32,11 @@ func (h *SrvHand) tasksHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		if err != nil {
 			// возвращает ошибку в JSON
+			h.Logger.Sugar().Error(err)
 			writeJson(w, reterror{Error: err.Error()})
 			return
 		}
+		h.Logger.Sugar().Info("get", len(tasks), "tasks")
 		writeJson(w, TasksResp{
 			Tasks: tasks,
 		})

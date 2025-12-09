@@ -14,7 +14,7 @@ RUN go mod download
 COPY . .
 
 # Собираем приложение.
-RUN go build -o main .
+RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 
 # Используем минимальный образ Alpine Linux для запуска приложения.
 FROM alpine:latest
@@ -24,10 +24,10 @@ WORKDIR /app
 
 # Устанавливаем глоб. переменнные
 ENV TODO_PORT=7540
-ENV TODO_DBFILE="scheduler.db"
-ENV TODO_PASSWORD=""
 # Копируем исполняемый файл из билдера.
 COPY --from=builder /app/main .
+RUN mkdir web
+COPY --from=builder /app/web web/
 
 # Открываем порт.
 EXPOSE $TODO_PORT
