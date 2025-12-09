@@ -11,7 +11,7 @@ import (
 )
 
 type Settings struct {
-	Ip   string
+	// Ip   string
 	Port int
 }
 
@@ -26,7 +26,8 @@ func RunSrv(logger *zap.Logger, settings *Settings, dbPlan *sql.DB) {
 	// создание своего сервера
 	mux := http.NewServeMux()
 	server := http.Server{
-		Addr:        settings.Ip + ":" + strconv.Itoa(settings.Port),
+		//Addr:        settings.Ip + ":" + strconv.Itoa(settings.Port),
+		Addr:        ":" + strconv.Itoa(settings.Port),
 		Handler:     mux,
 		ErrorLog:    nil,
 		ReadTimeout: 5 * time.Second,

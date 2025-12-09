@@ -20,21 +20,22 @@ const pattern = "20060102"
 // Init - конечные точки и вызов обработчиков.
 func (h *SrvHand) Init(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/signin", h.authHandler)
-	mux.HandleFunc("/api/nextdate", h.nextDayHandler)              // рассчитать следующую дату
-	mux.HandleFunc("GET /api/task", h.getTaskHandler)              // вернуть задачу по ID
-	mux.HandleFunc("POST /api/task", auth(h.addTaskHandler))       // добавить задачу в формате JSON
-	mux.HandleFunc("PUT /api/task", h.putTaskHandler)              // изменить задачу по ID
-	mux.HandleFunc("DELETE /api/task", h.deleteTaskHandler)        // удалить задачу по ID
-	mux.HandleFunc("GET /api/tasks", auth(h.tasksHandler))         // вернуть список ближайших задач в формате JSON
-	mux.HandleFunc("POST /api/task/done", auth(h.doneTaskHandler)) // задача выполнена
+	mux.HandleFunc("/api/nextdate", h.nextDayHandler)                        // рассчитать следующую дату
+	mux.HandleFunc("GET /api/task", h.getTaskHandler)                        // вернуть задачу по ID
+	mux.HandleFunc("POST /api/task", auth(h.Logger, h.addTaskHandler))       // добавить задачу в формате JSON
+	mux.HandleFunc("PUT /api/task", h.putTaskHandler)                        // изменить задачу по ID
+	mux.HandleFunc("DELETE /api/task", h.deleteTaskHandler)                  // удалить задачу по ID
+	mux.HandleFunc("GET /api/tasks/", auth(h.Logger, h.tasksHandler))        // вернуть список ближайших задач в формате JSON
+	mux.HandleFunc("POST /api/task/done", auth(h.Logger, h.doneTaskHandler)) // задача выполнена
 
 }
 
-func auth(next http.HandlerFunc) http.HandlerFunc {
+func auth(Logger *zap.Logger, next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// смотрим наличие пароля
 		passEnv := os.Getenv("TODO_PASSWORD")
 		if len(passEnv) > 0 {
+			Logger.Sugar().Info("password is indicated")
 			var jwtCookie string // JWT-токен из куки
 			// получаем куку
 			cookie, err := r.Cookie("token")
@@ -43,7 +44,8 @@ func auth(next http.HandlerFunc) http.HandlerFunc {
 			}
 			claims, err := services.ParseToken(jwtCookie)
 			if err != nil {
-				http.Error(w, "Неверный токен", http.StatusUnauthorized)
+				Logger.Sugar().Error("Ошибка парсинга токена")
+				http.Error(w, "Ошибка парсинга токена", http.StatusInternalServerError)
 				return
 			}
 
@@ -52,14 +54,16 @@ func auth(next http.HandlerFunc) http.HandlerFunc {
 			var valid bool
 			valid = hesh == claims.Hesh
 			// валидация и проверки JWT-токена
-			if valid {
-				next.ServeHTTP(w, r)
-				return
-			}
+			// if valid {
+			// 	next(w, r)
+			// 	return
+			// }
 
 			if !valid {
 				// возвращаем ошибку авторизации 401
+				Logger.Sugar().Error("Authentification required")
 				http.Error(w, "Authentification required", http.StatusUnauthorized)
+				//next(w, r)
 				return
 			}
 		}

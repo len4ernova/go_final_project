@@ -23,6 +23,7 @@ func (h *SrvHand) addTaskHandler(w http.ResponseWriter, r *http.Request) {
 	// Десериализация полученного запроса
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
+		h.Logger.Sugar().Errorf("didn't get body request: %v", err)
 		writeJson(w, reterror{Error: fmt.Sprintf("didn't get body request: %v", err)})
 		return
 	}
@@ -32,17 +33,20 @@ func (h *SrvHand) addTaskHandler(w http.ResponseWriter, r *http.Request) {
 	// Валидация данных
 	err = checkDate(&task)
 	if err != nil {
+		h.Logger.Sugar().Errorf("task: %v, %v", task, err)
 		writeJson(w, reterror{Error: err.Error()})
 		return
 	}
 	idTask, err := db.AddTask(h.DB, &task)
 	if err != nil {
+		h.Logger.Sugar().Error("task: %v, %v", task, err)
 		writeJson(w, reterror{Error: err.Error()})
 		return
 	}
 	result := retid{
 		Id: strconv.Itoa(int(idTask)),
 	}
+	h.Logger.Sugar().Info("/api/task: add task number", result)
 	writeJson(w, result)
 }
 

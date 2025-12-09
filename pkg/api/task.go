@@ -16,11 +16,13 @@ func (h *SrvHand) getTaskHandler(w http.ResponseWriter, r *http.Request) {
 	h.Logger.Sugar().Info("START: /api/task", strId, r.Method)
 	id, err := strconv.Atoi(strId)
 	if err != nil {
+		h.Logger.Sugar().Error(err)
 		writeJson(w, reterror{Error: err.Error()})
 		return
 	}
 	task, err := db.GetTask(h.DB, id)
 	if err != nil {
+		h.Logger.Sugar().Error(err)
 		writeJson(w, reterror{Error: err.Error()})
 		return
 	}
@@ -33,6 +35,7 @@ func (h *SrvHand) putTaskHandler(w http.ResponseWriter, r *http.Request) {
 	// Десериализация полученного запроса
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
+		h.Logger.Sugar().Error(fmt.Sprintf("didn't get body request: %v", err))
 		writeJson(w, reterror{Error: fmt.Sprintf("didn't get body request: %v", err)})
 		return
 	}
@@ -41,19 +44,23 @@ func (h *SrvHand) putTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Валидация данных
 	if len(task.ID) == 0 {
+		h.Logger.Sugar().Error("value of <title> was empty")
 		writeJson(w, reterror{Error: "value of <title> was empty"})
 		return
 	}
 	err = checkDate(&task)
 	if err != nil {
+		h.Logger.Sugar().Error(err)
 		writeJson(w, reterror{Error: err.Error()})
 		return
 	}
 	err = db.UpdateTask(h.DB, &task)
 	if err != nil {
+		h.Logger.Sugar().Error(err)
 		writeJson(w, reterror{Error: err.Error()})
 		return
 	}
 
+	h.Logger.Sugar().Info("task changed ok")
 	writeJson(w, struct{}{})
 }

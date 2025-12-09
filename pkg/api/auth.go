@@ -20,26 +20,31 @@ func (h *SrvHand) authHandler(w http.ResponseWriter, r *http.Request) {
 	h.Logger.Sugar().Info("START  /api/signin", r.Method)
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
+		h.Logger.Sugar().Error(fmt.Sprintf("didn't get body: %v", err))
 		writeJson(w, reterror{Error: fmt.Sprintf("didn't get body: %v", err)})
 		return
 	}
 	var ps password
 	err = json.Unmarshal(body, &ps)
 	if err != nil {
+		h.Logger.Sugar().Error(fmt.Sprintf("didn't get body: %v", err))
 		writeJson(w, reterror{Error: fmt.Sprintf("didn't get body: %v", err)})
 		return
 	}
 	passUser := ps.Password
 	passEnv := os.Getenv("TODO_PASSWORD")
+	//fmt.Println("passUser", passUser, "passEnv", passEnv)
 	if passEnv == passUser {
 		// хеш пароля
 		hesh := sha256.Sum256([]byte(passEnv))
 		// генерация токена
 		jwttoken, err := services.GenerateJWT(hesh)
 		if err != nil {
+			h.Logger.Sugar().Error(fmt.Sprintf("didn't generate jwt token: %v", err))
 			writeJson(w, reterror{Error: fmt.Sprintf("didn't generate jwt token: %v", err)})
 			return
 		}
+		//fmt.Println("jwttoken=", jwttoken)
 		data := struct {
 			Token string `json:"token"`
 		}{
@@ -53,9 +58,11 @@ func (h *SrvHand) authHandler(w http.ResponseWriter, r *http.Request) {
 			SameSite: http.SameSiteStrictMode,
 		}
 		http.SetCookie(w, &cookie)
+		h.Logger.Sugar().Info("token was set")
 		writeJson(w, data)
 		return
 	}
+	h.Logger.Sugar().Error("invalid password")
 	writeJson(w, reterror{Error: "invalid password"})
 
 }

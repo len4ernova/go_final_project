@@ -12,7 +12,6 @@ import (
 )
 
 const dfltPort = 7540
-const dfltIp = "127.0.0.1"
 const dfltDB = "scheduler.db"
 
 func main() {
@@ -51,10 +50,11 @@ func main() {
 
 	// настройки сервера
 	settingsSrv := server.Settings{
-		Ip:   dfltIp,
+		// Ip:   dfltIp,
 		Port: port,
 	}
 
+	logger.Sugar().Info("db =", dbName)
 	server.RunSrv(logger, &settingsSrv, DBplaner)
 	// if err != nil {
 	// 	logger.Fatal(err.Error())
