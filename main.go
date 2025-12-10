@@ -54,7 +54,7 @@ func main() {
 		Port: port,
 	}
 
-	logger.Sugar().Info("db =", dbName)
+	logger.Sugar().Info("db = ", dbName)
 	server.RunSrv(logger, &settingsSrv, DBplaner)
 	// if err != nil {
 	// 	logger.Fatal(err.Error())

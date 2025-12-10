@@ -17,7 +17,7 @@ type password struct {
 
 // аутентификация
 func (h *SrvHand) authHandler(w http.ResponseWriter, r *http.Request) {
-	h.Logger.Sugar().Info("START  /api/signin", r.Method)
+	h.Logger.Sugar().Info("START  /api/signin ", r.Method)
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		h.Logger.Sugar().Error(fmt.Sprintf("didn't get body: %v", err))
@@ -44,7 +44,7 @@ func (h *SrvHand) authHandler(w http.ResponseWriter, r *http.Request) {
 			writeJson(w, reterror{Error: fmt.Sprintf("didn't generate jwt token: %v", err)})
 			return
 		}
-		//fmt.Println("jwttoken=", jwttoken)
+		// fmt.Println("jwttoken=", jwttoken)
 		data := struct {
 			Token string `json:"token"`
 		}{

@@ -11,7 +11,7 @@ import (
 // doneTaskHandler - задача выполнена.
 func (h *SrvHand) doneTaskHandler(w http.ResponseWriter, r *http.Request) {
 	strId := r.URL.Query().Get("id")
-	h.Logger.Sugar().Info("START /api/task/done", r.Method, "strId = ", strId)
+	h.Logger.Sugar().Info("START /api/task/done ", r.Method, " strId = ", strId)
 	id, err := strconv.Atoi(strId)
 	if err != nil {
 		h.Logger.Sugar().Error(err)
@@ -48,6 +48,6 @@ func (h *SrvHand) doneTaskHandler(w http.ResponseWriter, r *http.Request) {
 		writeJson(w, struct{}{})
 		return
 	}
-	h.Logger.Sugar().Info("task", strId, "changed")
+	h.Logger.Sugar().Info("task ", strId, " changed")
 	writeJson(w, struct{}{})
 }

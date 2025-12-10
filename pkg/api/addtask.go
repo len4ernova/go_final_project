@@ -19,7 +19,7 @@ type retid struct {
 }
 
 func (h *SrvHand) addTaskHandler(w http.ResponseWriter, r *http.Request) {
-	h.Logger.Sugar().Info("START /api/task", r.Method)
+	h.Logger.Sugar().Info("START /api/task ", r.Method)
 	// Десериализация полученного запроса
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -46,7 +46,7 @@ func (h *SrvHand) addTaskHandler(w http.ResponseWriter, r *http.Request) {
 	result := retid{
 		Id: strconv.Itoa(int(idTask)),
 	}
-	h.Logger.Sugar().Info("/api/task: add task number", result)
+	h.Logger.Sugar().Info("/api/task: add task number ", result)
 	writeJson(w, result)
 }
 

@@ -13,7 +13,7 @@ import (
 // getTaskHandler - вернуть задачу по ID.
 func (h *SrvHand) getTaskHandler(w http.ResponseWriter, r *http.Request) {
 	strId := r.URL.Query().Get("id")
-	h.Logger.Sugar().Info("START: /api/task", strId, r.Method)
+	h.Logger.Sugar().Infof("START: /api/task %v strId = %v", r.Method, strId)
 	id, err := strconv.Atoi(strId)
 	if err != nil {
 		h.Logger.Sugar().Error(err)
@@ -31,7 +31,7 @@ func (h *SrvHand) getTaskHandler(w http.ResponseWriter, r *http.Request) {
 
 // putTaskHandler - изменить задачу по ID.
 func (h *SrvHand) putTaskHandler(w http.ResponseWriter, r *http.Request) {
-	h.Logger.Sugar().Info("START /api/task", r.Method)
+	h.Logger.Sugar().Info("START /api/task ", r.Method)
 	// Десериализация полученного запроса
 	body, err := io.ReadAll(r.Body)
 	if err != nil {

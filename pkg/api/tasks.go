@@ -36,7 +36,7 @@ func (h *SrvHand) tasksHandler(w http.ResponseWriter, r *http.Request) {
 			writeJson(w, reterror{Error: err.Error()})
 			return
 		}
-		h.Logger.Sugar().Info("get", len(tasks), "tasks")
+		h.Logger.Sugar().Info("get ", len(tasks), " tasks")
 		writeJson(w, TasksResp{
 			Tasks: tasks,
 		})

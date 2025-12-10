@@ -10,7 +10,7 @@ import (
 // deleteTaskHandler - удалить задачу по ID.
 func (h *SrvHand) deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 	strId := r.URL.Query().Get("id")
-	h.Logger.Sugar().Info("START /api/task", "strId = ", strId, r.Method)
+	h.Logger.Sugar().Infof("START /api/task %v strId = %v", r.Method, strId)
 	if len(strId) == 0 {
 		h.Logger.Sugar().Error("empty value <id>")
 		writeJson(w, reterror{Error: "empty value <id>"})
@@ -28,6 +28,6 @@ func (h *SrvHand) deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
 		writeJson(w, reterror{Error: err.Error()})
 		return
 	}
-	h.Logger.Sugar().Info(strId, "deleted ok")
+	h.Logger.Sugar().Info(strId, " deleted ok")
 	writeJson(w, struct{}{})
 }

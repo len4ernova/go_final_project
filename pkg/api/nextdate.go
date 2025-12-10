@@ -37,6 +37,7 @@ func (h *SrvHand) nextDayHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	h.Logger.Sugar().Infof("nowTime: %v, date = %v, repeat = %v", nowTime, date, repeat)
 	nxtDate, err := NextDate(nowTime, date, repeat)
 	if err != nil {
 		h.Logger.Sugar().Errorf("didn't get next date: %v", err)
@@ -162,18 +163,18 @@ func nextWeekDay(now time.Time, dstart time.Time, repeat string) (string, error)
 	}
 
 	var nxtDate time.Time
-	date := time.Now()
-	if afterNow(date, dstart) {
-		nxtDate = date
-	} else {
-		nxtDate = dstart.AddDate(0, 0, 2)
-	}
+	// //date := time.Now()
+	// date := now
+	// if afterNow(date, dstart) {
+	// 	nxtDate = date
+	// } else {
+	// 	nxtDate = dstart.AddDate(0, 0, 2)
+	// }
+	nxtDate = dstart
 
-	// fmt.Println(int(nxtDate.Weekday()), nxtDate.Day(), "\n", matrixWeek)
 	for {
 		nxtDate = nxtDate.AddDate(0, 0, 1)
 		i := int(nxtDate.Weekday())
-		// fmt.Println(nxtDate, nxtDate.Weekday(), i)
 
 		if int(nxtDate.Weekday()) == 0 {
 			// Sunday
@@ -223,20 +224,19 @@ func getRepeatValues(repeat string) ([]int, error) {
 
 func nextMonthDay(now time.Time, dstart time.Time, repeat string) (string, error) {
 	// формирование дней недели из repeat
-	currentDate := time.Now()
-	var date time.Time
-	if afterNow(currentDate, dstart) {
-		date = currentDate
-	} else {
-		date = dstart
-	}
-
+	// currentDate := time.Now()
+	// var date time.Time
+	// if afterNow(currentDate, dstart) {
+	// 	date = currentDate
+	// } else {
+	// 	date = dstart
+	// }
+	date := dstart
 	// разбираем repeat и выбираем месяцы и дни
 	checkDays, checkMonth, err := getRepeatValuesMoth(repeat)
 	if err != nil {
 		return "", err
 	}
-	// fmt.Println(checkMonth, checkDays)
 
 	// формирование вспомогательных матриц: месяцы(13 элементов), 12х32 - дни.
 	matrixMonth := make([]int, maxMonth+1)
@@ -260,7 +260,7 @@ func nextMonthDay(now time.Time, dstart time.Time, repeat string) (string, error
 		if isMonth == 1 {
 			// определяем год, берём на основе значения now. Год нужен для нахождения высокосного года.
 			var year int
-			if monthNumber < currentMonth {
+			if monthNumber <= currentMonth {
 				year = now.Year()
 			} else {
 				year = now.Year() + 1
@@ -292,6 +292,7 @@ func nextMonthDay(now time.Time, dstart time.Time, repeat string) (string, error
 		date = date.AddDate(0, 0, 1)
 		m := int(date.Month())
 		day := date.Day()
+
 		if matrixMonth[m] == 1 {
 			if matrixDays[m][day] == 1 {
 				if afterNow(date, now) {
