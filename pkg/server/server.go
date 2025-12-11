@@ -7,16 +7,12 @@ import (
 	"time"
 
 	"github.com/len4ernova/go_final_project/pkg/api"
+	"github.com/len4ernova/go_final_project/pkg/services"
 	"go.uber.org/zap"
 )
 
-type Settings struct {
-	// Ip   string
-	Port int
-}
-
 // RunSrv - запустить сервер.
-func RunSrv(logger *zap.Logger, settings *Settings, dbPlan *sql.DB) {
+func RunSrv(logger *zap.Logger, settings *services.Config, dbPlan *sql.DB) {
 	// структура с логгером, обработчиками
 	hands := api.SrvHand{
 		Logger: logger,
@@ -43,7 +39,7 @@ func RunSrv(logger *zap.Logger, settings *Settings, dbPlan *sql.DB) {
 
 	hands.Init(mux)
 
-	logger.Sugar().Info("Serving on http://%v ...", server.Addr)
+	logger.Sugar().Infof("Serving on http://%v ...", server.Addr)
 	if err := server.ListenAndServe(); err != nil {
 		logger.Sugar().Fatal(err)
 	}

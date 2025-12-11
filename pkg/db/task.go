@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"strconv"
 )
@@ -13,6 +14,8 @@ type Task struct {
 	Comment string `json:"comment"`
 	Repeat  string `json:"repeat"`
 }
+
+var ErrDeleteZeroRows = errors.New("no rows was found with id")
 
 // AddTask - добавление задачи в таблицу scheduler и возврат идентификатора добавленной записи.
 func AddTask(db *sql.DB, task *Task) (int64, error) {
@@ -49,6 +52,10 @@ func Tasks(db *sql.DB, limit int) ([]*Task, error) {
 		}
 		tasks = append(tasks, &t)
 	}
+	err = rows.Err()
+	if err != nil {
+		return []*Task{}, err
+	}
 	return tasks, nil
 }
 
@@ -75,6 +82,10 @@ func TasksSearch(db *sql.DB, limit int, srchDate string, isDate bool) ([]*Task, 
 			return []*Task{}, err
 		}
 		tasks = append(tasks, &t)
+	}
+	err = rows.Err()
+	if err != nil {
+		return []*Task{}, err
 	}
 	return tasks, nil
 
@@ -122,10 +133,16 @@ func UpdateTask(db *sql.DB, task *Task) error {
 func DeleteTask(db *sql.DB, id int) error {
 	query := `DELETE FROM scheduler
 					WHERE id=:id`
-	_, err := db.Exec(query,
-		sql.Named("id", id))
+	result, err := db.Exec(query, sql.Named("id", id))
 	if err != nil {
 		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return ErrDeleteZeroRows
 	}
 	return nil
 }

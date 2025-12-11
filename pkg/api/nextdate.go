@@ -32,7 +32,7 @@ func (h *SrvHand) nextDayHandler(w http.ResponseWriter, r *http.Request) {
 		nowTime, err = time.Parse(pattern, now)
 		if err != nil {
 			h.Logger.Sugar().Errorf("date(<now>) conversion error: %v", err)
-			writeJson(w, reterror{Error: "date(<now>) conversion error"})
+			writeJson(w, reterror{Error: "date(<now>) conversion error"}, http.StatusBadRequest)
 			return
 		}
 	}
@@ -41,7 +41,7 @@ func (h *SrvHand) nextDayHandler(w http.ResponseWriter, r *http.Request) {
 	nxtDate, err := NextDate(nowTime, date, repeat)
 	if err != nil {
 		h.Logger.Sugar().Errorf("didn't get next date: %v", err)
-		writeJson(w, reterror{Error: fmt.Sprintf("didn't get next date: %v", err)})
+		writeJson(w, reterror{Error: "didn't get next date"}, http.StatusInternalServerError)
 		return
 	}
 

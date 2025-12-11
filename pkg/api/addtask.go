@@ -24,7 +24,7 @@ func (h *SrvHand) addTaskHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		h.Logger.Sugar().Errorf("didn't get body request: %v", err)
-		writeJson(w, reterror{Error: fmt.Sprintf("didn't get body request: %v", err)})
+		writeJson(w, reterror{Error: fmt.Sprint("didn't get body request")}, http.StatusBadRequest)
 		return
 	}
 	var task db.Task
@@ -34,31 +34,34 @@ func (h *SrvHand) addTaskHandler(w http.ResponseWriter, r *http.Request) {
 	err = checkDate(&task)
 	if err != nil {
 		h.Logger.Sugar().Errorf("task: %v, %v", task, err)
-		writeJson(w, reterror{Error: err.Error()})
+		writeJson(w, reterror{Error: err.Error()}, http.StatusBadRequest)
 		return
 	}
 	idTask, err := db.AddTask(h.DB, &task)
 	if err != nil {
 		h.Logger.Sugar().Error("task: %v, %v", task, err)
-		writeJson(w, reterror{Error: err.Error()})
+		writeJson(w, reterror{Error: "internal error"}, http.StatusInternalServerError)
 		return
 	}
 	result := retid{
 		Id: strconv.Itoa(int(idTask)),
 	}
 	h.Logger.Sugar().Info("/api/task: add task number ", result)
-	writeJson(w, result)
+	writeJson(w, result, http.StatusOK)
 }
 
 // writeJson - записать json.
-func writeJson(w http.ResponseWriter, data any) {
+func writeJson(w http.ResponseWriter, data any, statusCode int) {
 	jsondata, err := json.Marshal(data)
 	if err != nil {
-		http.Error(w, "error encoding response", http.StatusInternalServerError)
+		http.Error(w, "error encoding response", statusCode)
 	}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
-	w.Write(jsondata)
-
+	w.WriteHeader(statusCode)
+	_, err = w.Write(jsondata)
+	if err != nil {
+		http.Error(w, "error writing data", http.StatusInternalServerError)
+	}
 }
 
 // checkDate - проверить на корректность полученное значение task.Date.

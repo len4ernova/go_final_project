@@ -33,24 +33,21 @@ func (h *SrvHand) tasksHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			// возвращает ошибку в JSON
 			h.Logger.Sugar().Error(err)
-			writeJson(w, reterror{Error: err.Error()})
+			writeJson(w, reterror{Error: "error data output"}, http.StatusInternalServerError)
 			return
 		}
 		h.Logger.Sugar().Info("get ", len(tasks), " tasks")
-		writeJson(w, TasksResp{
-			Tasks: tasks,
-		})
+		writeJson(w, TasksResp{Tasks: tasks}, http.StatusOK)
 		return
 	}
 	tasks, err := db.Tasks(h.DB, maxRows) // в параметре максимальное количество записей
 	if err != nil {
 		// возвращает ошибку в JSON
-		writeJson(w, reterror{Error: err.Error()})
+		h.Logger.Sugar().Errorf("error data output: %v", err)
+		writeJson(w, reterror{Error: "error data output"}, http.StatusInternalServerError)
 		return
 	}
-	writeJson(w, TasksResp{
-		Tasks: tasks,
-	})
+	writeJson(w, TasksResp{Tasks: tasks}, http.StatusOK)
 }
 
 // verifySearchDate - проверка корректности введенной даты и конвертация в нужный формат.

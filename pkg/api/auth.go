@@ -21,14 +21,14 @@ func (h *SrvHand) authHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		h.Logger.Sugar().Error(fmt.Sprintf("didn't get body: %v", err))
-		writeJson(w, reterror{Error: fmt.Sprintf("didn't get body: %v", err)})
+		writeJson(w, reterror{Error: fmt.Sprint("didn't get body request")}, http.StatusBadRequest)
 		return
 	}
 	var ps password
 	err = json.Unmarshal(body, &ps)
 	if err != nil {
 		h.Logger.Sugar().Error(fmt.Sprintf("didn't get body: %v", err))
-		writeJson(w, reterror{Error: fmt.Sprintf("didn't get body: %v", err)})
+		writeJson(w, reterror{Error: fmt.Sprint("didn't get body request")}, http.StatusBadRequest)
 		return
 	}
 	passUser := ps.Password
@@ -41,7 +41,7 @@ func (h *SrvHand) authHandler(w http.ResponseWriter, r *http.Request) {
 		jwttoken, err := services.GenerateJWT(hesh)
 		if err != nil {
 			h.Logger.Sugar().Error(fmt.Sprintf("didn't generate jwt token: %v", err))
-			writeJson(w, reterror{Error: fmt.Sprintf("didn't generate jwt token: %v", err)})
+			writeJson(w, reterror{Error: fmt.Sprint("didn't generate jwt token")}, http.StatusInternalServerError)
 			return
 		}
 		// fmt.Println("jwttoken=", jwttoken)
@@ -59,10 +59,10 @@ func (h *SrvHand) authHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		http.SetCookie(w, &cookie)
 		h.Logger.Sugar().Info("token was set")
-		writeJson(w, data)
+		writeJson(w, data, http.StatusOK)
 		return
 	}
 	h.Logger.Sugar().Error("invalid password")
-	writeJson(w, reterror{Error: "invalid password"})
+	writeJson(w, reterror{Error: "invalid password"}, http.StatusUnauthorized)
 
 }

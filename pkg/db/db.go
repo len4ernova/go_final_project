@@ -21,11 +21,16 @@ const index = `CREATE INDEX schedule_date ON scheduler (date);`
 var PlanDB *sql.DB
 
 // Init - инициализация БД.
-func Init(dbFile string, db *sql.DB) error {
-	if !checkExist(dbFile) {
-		create(db, schema+index)
+func Init(dbName string) (*sql.DB, error) {
+	db, err := sql.Open("sqlite", dbName)
+	if err != nil {
+		return db, err
 	}
-	return nil
+
+	if !checkExist(dbName) {
+		return db, create(db, schema+index)
+	}
+	return db, nil
 }
 
 // checkExist - проверка существование БД.
