@@ -2,6 +2,6 @@ package tests
 
 var Port = 7540
 var DBFile = "../scheduler.db"
-var FullNextDate = false
-var Search = false
-var Token = ``
+var FullNextDate = true
+var Search = true
+var Token = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJoZXNoIjpbODksMTQ4LDcxLDI2LDE4NywxLDE3LDQyLDI1MiwxOTMsMTI5LDg5LDI0NiwyMDQsMTE2LDE4MCwyNDUsMTcsMTg1LDE1Miw2LDIxOCw4OSwxNzksMjAyLDI0NSwxNjksMTkzLDExNSwyMDIsMjA3LDE5N10sImlzcyI6IlBsYW5uZXIiLCJleHAiOjE3NjUzODIzMjR9.V0fDcJfjl5YwcI3LJhq6c0XjjE86JMvc5ay86OPjGSQ`
