@@ -57,3 +57,8 @@ TODO_PORT=7540
 TODO_DBFILE=scheduler.db
 TODO_PASSWORD=12345
 ```
+
+
+ ![Общий вид](planner1.png) 
+
+ ![Повторяемость](planner_2.png) 
